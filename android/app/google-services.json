@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "770271142098",
+    "project_id": "maps-codexveer",
+    "storage_bucket": "maps-codexveer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770271142098:android:76a3419afd976c93300d0b",
+        "android_client_info": {
+          "package_name": "com.codexveer.google_maps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "770271142098-knrq7au02t00vj4tgusa0aecmdngjmiq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfsnAhPwM5hqaU-oadT6zmI-9TgcmsTs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "770271142098-knrq7au02t00vj4tgusa0aecmdngjmiq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
