@@ -339,7 +339,16 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 valueListenable: _originAddr,
                 builder: (context, value, _) {
                   return getDirections && _originAddr.value.trim().isNotEmpty
-                      ? showAutoCompleteListUponNavigation()
+                      ? showOriginAutoCompleteListUponNavigation()
+                      : Container();
+                },
+              ),
+              ValueListenableBuilder(
+                valueListenable: _destinationAddr,
+                builder: (context, value, _) {
+                  return getDirections &&
+                          _destinationAddr.value.trim().isNotEmpty
+                      ? showDestinationAutoCompleteListUponNavigation()
                       : Container();
                 },
               ),
@@ -1056,6 +1065,9 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 color: Colors.blue.shade100,
               ),
               child: TextFormField(
+                onTap: () {
+                  _destinationAddr.value = '';
+                },
                 autofocus: true,
                 controller: _originController,
                 keyboardType: TextInputType.streetAddress,
@@ -1089,6 +1101,9 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 color: Colors.blue.shade100,
               ),
               child: TextFormField(
+                onTap: () {
+                  _originAddr.value = '';
+                },
                 controller: _destinationController,
                 textInputAction: TextInputAction.search,
                 keyboardType: TextInputType.streetAddress,
@@ -1188,8 +1203,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   }
 
 //!Function to show auto complete suggestion in stack upon origin to destination navigation in flutter
-  Positioned showAutoCompleteListUponNavigation() {
-    return _originAddr.value.trim().length >= 2
+  Positioned showOriginAutoCompleteListUponNavigation() {
+    return noreslt == false && _originAddr.value.trim().length >= 2
         ? Positioned(
             top: 150,
             right: 20,
@@ -1305,8 +1320,125 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 ]),
               ),
             ));
+  }
 
-    //
+  Positioned showDestinationAutoCompleteListUponNavigation() {
+    return noreslt == false && _destinationAddr.value.trim().length >= 2
+        ? Positioned(
+            top: 150,
+            right: 20,
+            left: 20,
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.red.shade100.withOpacity(0.7),
+              ),
+              child: FutureBuilder(
+                future: onChange(_destinationAddr.value),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  return snapshot.hasData
+                      ? ListView.builder(
+                          itemCount: snapshot.data['predictions'].length ?? 3,
+                          padding: const EdgeInsets.only(top: 0, right: 0),
+                          itemBuilder: (BuildContext context, int index) {
+                            if (snapshot.hasData) {
+                              return ListTile(
+                                title: Text(
+                                  snapshot.data['predictions'][index]
+                                          ['description']
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontFamily: 'WorkSans',
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _destinationController.text = snapshot
+                                        .data['predictions'][index]
+                                            ['description']
+                                        .toString();
+                                    //!important
+                                    FocusScope.of(context).requestFocus(
+                                        FocusNode()); //to close the keyboard
+                                    _destinationAddr.value = '';
+                                  });
+                                },
+                                leading: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.red,
+                                ),
+                              );
+                            } else {
+                              setState(() {
+                                if (_destinationAddr.value.trim().length >= 2 &&
+                                    snapshot.hasData) {
+                                  noreslt = true;
+                                }
+                              });
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        )
+                      : Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            CircularProgressIndicator(),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Loading...",
+                                textScaleFactor: 1.5,
+                              ),
+                            ),
+                          ],
+                        ));
+                },
+              ),
+            ),
+          )
+        : Positioned(
+            top: 150,
+            right: 20,
+            left: 20,
+            child: Container(
+              height: 200.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.red.shade100.withOpacity(0.7),
+              ),
+              child: Center(
+                child: Column(children: [
+                  const Text('No results to show',
+                      style: TextStyle(
+                          fontFamily: 'WorkSans', fontWeight: FontWeight.w400)),
+                  const SizedBox(height: 5.0),
+                  Container(
+                    width: 125.0,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          getDirections = false;
+                          _originController.clear();
+                          _destinationController.clear();
+                        });
+                      },
+                      child: const Center(
+                        child: Text(
+                          'Close this',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'WorkSans',
+                              fontWeight: FontWeight.w300),
+                        ),
+                      ),
+                    ),
+                  )
+                ]),
+              ),
+            ));
   }
 
 //! functction for naviagtion to a spectific latlang
