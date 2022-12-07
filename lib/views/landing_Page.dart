@@ -50,8 +50,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   final GlobalKey<FabCircularMenuState> fabKey = GlobalKey();
 //! variables & Constants
   String searchAddr = '';
-  String originAddr = '';
-  String destinationAddr = '';
+  ValueNotifier<String> _originAddr = ValueNotifier<String>('');
+  ValueNotifier<String> _destinationAddr = ValueNotifier<String>('');
   String tokenKey = '';
   var tappedPoint;
   var radiusValue = 3000.0;
@@ -72,19 +72,20 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   CameraPosition _currentCameraPosition =
       _kGooglePlex; //initially set to starting camera position.
 //!onchage Function to assign session token to the user
-  onChange() {
+  onChange(String inputvalue) {
     if (_sessionToken.isEmpty) {
       _sessionToken = uuid.v4();
     }
     //return getSuggestion(_autocompletesearcheditingcontroller.text);//correct when used withoutdebounce
-    return getSuggestion(_searchautocompleteAddr
-        .value); //correct both with debounce and withoutdebounce
+    return getSuggestion(
+        inputvalue); //correct both with debounce and withoutdebounce
   }
 
 //! Function to get current user location through GPS
   Future<Position> getcurrentuserlocation() async {
-    await Geolocator.requestPermission()
-        .then((value) => null)
+    await Geolocator.requestPermission().then((value) {
+      FocusScope.of(context).requestFocus(FocusNode());
+    }) //to close the keyboarad if any
         .onError((error, stackTrace) => null);
     return await Geolocator.getCurrentPosition();
   }
@@ -258,7 +259,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   void initState() {
     super.initState();
     _autocompletesearcheditingcontroller.addListener(() {
-      onChange();
+      onChange(_searchautocompleteAddr.value);
     });
     _pageController = PageController(initialPage: 1, viewportFraction: 0.85)
       ..addListener(_onScroll);
@@ -273,7 +274,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     _originController.dispose();
     _destinationController.dispose();
     _autocompletesearcheditingcontroller.removeListener(() {
-      onChange();
+      onChange(_searchautocompleteAddr.value);
     });
     _debounce?.cancel();
     PageController().dispose();
@@ -333,6 +334,15 @@ class _PracticePageState extends ConsumerState<PracticePage> {
               getDirections
                   ? getDirectionAndOriginToDestinationNavigate()
                   : Container(),
+              //!Stack to show navigation autocomplete result
+              ValueListenableBuilder(
+                valueListenable: _originAddr,
+                builder: (context, value, _) {
+                  return getDirections && _originAddr.value.trim().isNotEmpty
+                      ? showAutoCompleteListUponNavigation()
+                      : Container();
+                },
+              ),
               //!Stack to show radius slider
               radiusSlider
                   ? Padding(
@@ -686,6 +696,9 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     pressedNear = false;
                     cardTapped = false;
                     getDirections = false;
+                    _searchautocompleteAddr.value = '';
+                    _originAddr.value = '';
+                    _destinationAddr.value = '';
                   });
                   if (fabKey.currentState!.isOpen) {
                     fabKey.currentState!.close();
@@ -700,6 +713,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     _autocompletesearcheditingcontroller.clear();
                     _originController.clear();
                     _destinationController.clear();
+                    //
+                    _searchautocompleteAddr.value = '';
+                    _originAddr.value = '';
+                    _destinationAddr.value = '';
                     //
                     radiusSlider = false;
                     pressedNear = false;
@@ -720,7 +737,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     _originController.clear();
                     _destinationController.clear();
                     //
-
+                    _searchautocompleteAddr.value = '';
+                    _originAddr.value = '';
+                    _destinationAddr.value = '';
+                    //
                     radiusSlider = false;
                     pressedNear = false;
                     cardTapped = false;
@@ -776,6 +796,17 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             color: Colors.blue.shade100),
         child: TextField(
           controller: _searcheditingcontroller,
+          keyboardType: TextInputType.streetAddress,
+          showCursor: true,
+          autocorrect: true,
+          autofocus: false,
+          onEditingComplete: () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+            GoogleMapController mapController = await _controller.future.then(
+                (value) => searchandNavigate(
+                    value, _searcheditingcontroller.text,
+                    zoom: 14));
+          },
           decoration: InputDecoration(
               hintText: 'Enter Address',
               border: InputBorder.none,
@@ -783,10 +814,11 @@ class _PracticePageState extends ConsumerState<PracticePage> {
               suffixIcon: IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () async {
+                    FocusScope.of(context).requestFocus(FocusNode());
                     GoogleMapController mapController = await _controller.future
                         .then((value) => searchandNavigate(
-                            value, _searcheditingcontroller.text));
-                    _searcheditingcontroller.clear();
+                            value, _searcheditingcontroller.text,
+                            zoom: 14));
                   },
                   iconSize: 30.0)),
           onChanged: (val) {
@@ -891,7 +923,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 color: Colors.red.shade100.withOpacity(0.7),
               ),
               child: FutureBuilder(
-                future: onChange(),
+                future: onChange(_searchautocompleteAddr.value),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   return snapshot.hasData
                       ? ListView.builder(
@@ -1028,6 +1060,14 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 controller: _originController,
                 keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
+                onChanged: (val) {
+                  //!<<<<debounce
+                  if (_debounce?.isActive ?? false) _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    _originAddr.value = val;
+                  });
+                  //!debounce>>>>
+                },
                 decoration: const InputDecoration(
                   filled: true,
                   hintText: 'Origin',
@@ -1052,6 +1092,14 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 controller: _destinationController,
                 textInputAction: TextInputAction.search,
                 keyboardType: TextInputType.streetAddress,
+                onChanged: (val) {
+                  //!<<<<debounce
+                  if (_debounce?.isActive ?? false) _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    _destinationAddr.value = val;
+                  });
+                  //!debounce>>>>
+                },
                 onEditingComplete: () async {
                   var directions = await MapServices().getDirections(
                       _originController.text, _destinationController.text);
@@ -1139,7 +1187,127 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
-//!Function to show auto complete suggestion in stack upon origin to cestination navigation in flutter
+//!Function to show auto complete suggestion in stack upon origin to destination navigation in flutter
+  Positioned showAutoCompleteListUponNavigation() {
+    return _originAddr.value.trim().length >= 2
+        ? Positioned(
+            top: 150,
+            right: 20,
+            left: 20,
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.red.shade100.withOpacity(0.7),
+              ),
+              child: FutureBuilder(
+                future: onChange(_originAddr.value),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  return snapshot.hasData
+                      ? ListView.builder(
+                          itemCount: snapshot.data['predictions'].length ?? 3,
+                          padding: const EdgeInsets.only(top: 0, right: 0),
+                          itemBuilder: (BuildContext context, int index) {
+                            if (snapshot.hasData) {
+                              return ListTile(
+                                title: Text(
+                                  snapshot.data['predictions'][index]
+                                          ['description']
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontFamily: 'WorkSans',
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _originController.text = snapshot
+                                        .data['predictions'][index]
+                                            ['description']
+                                        .toString();
+                                    //!important
+                                    FocusScope.of(context).requestFocus(
+                                        FocusNode()); //to close the keyboard
+                                    _originAddr.value = '';
+                                  });
+                                },
+                                leading: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.red,
+                                ),
+                              );
+                            } else {
+                              setState(() {
+                                if (_originAddr.value.trim().length >= 2 &&
+                                    snapshot.hasData) {
+                                  noreslt = true;
+                                }
+                              });
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        )
+                      : Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            CircularProgressIndicator(),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Loading...",
+                                textScaleFactor: 1.5,
+                              ),
+                            ),
+                          ],
+                        ));
+                },
+              ),
+            ),
+          )
+        : Positioned(
+            top: 150,
+            right: 20,
+            left: 20,
+            child: Container(
+              height: 200.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.red.shade100.withOpacity(0.7),
+              ),
+              child: Center(
+                child: Column(children: [
+                  const Text('No results to show',
+                      style: TextStyle(
+                          fontFamily: 'WorkSans', fontWeight: FontWeight.w400)),
+                  const SizedBox(height: 5.0),
+                  Container(
+                    width: 125.0,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          getDirections = false;
+                          _originController.clear();
+                          _destinationController.clear();
+                        });
+                      },
+                      child: const Center(
+                        child: Text(
+                          'Close this',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'WorkSans',
+                              fontWeight: FontWeight.w300),
+                        ),
+                      ),
+                    ),
+                  )
+                ]),
+              ),
+            ));
+
+    //
+  }
 
 //! functction for naviagtion to a spectific latlang
   searchandNavigate(GoogleMapController mapController, String inputvalue,
