@@ -41,7 +41,6 @@ class _PracticePageState extends ConsumerState<PracticePage> {
 //! boolean values for ui
   bool showsearchbar = false;
   bool showautocompletesearchbar = false;
-  bool shownavigationbar = false;
   bool noreslt = false;
   bool radiusSlider = false;
   bool cardTapped = false;
@@ -62,8 +61,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   Completer<GoogleMapController> _controller = Completer();
 //! Initial camera position
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(26.7538, 83.2135),
-    zoom: 14.4746,
+    target: LatLng(20.5937, 78.9629),
+    zoom: 4,
   );
 //! Getting uuid of the device of the user & session token
   var uuid = const Uuid();
@@ -679,12 +678,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                   setState(() {
                     showsearchbar = true;
                     showautocompletesearchbar = false;
-                    shownavigationbar = false;
                     _searcheditingcontroller.clear();
                     _autocompletesearcheditingcontroller.clear();
                     _originController.clear();
                     _destinationController.clear();
-                    //
                     radiusSlider = false;
                     pressedNear = false;
                     cardTapped = false;
@@ -700,7 +697,6 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                   setState(() {
                     showsearchbar = false;
                     showautocompletesearchbar = true;
-                    shownavigationbar = false;
                     _autocompletesearcheditingcontroller.clear();
                     _originController.clear();
                     _destinationController.clear();
@@ -720,7 +716,6 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                   setState(() {
                     showsearchbar = false;
                     showautocompletesearchbar = false;
-                    shownavigationbar = true;
                     _autocompletesearcheditingcontroller.clear();
                     _originController.clear();
                     _destinationController.clear();
@@ -766,7 +761,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
-//! Function for normal searchbar
+//! Function for normal searchbarin stack
   Positioned searchbar() {
     return Positioned(
       top: 30.0,
@@ -805,7 +800,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
-//!Function for autocomplete searchbar
+//!Function for autocomplete searchbar in stack
   Positioned autocompletesearchbar() {
     return Positioned(
       top: 30.0,
@@ -882,7 +877,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
-// //!function to show auto complete suggestion
+// //!function to show auto complete suggestion in stack
   Positioned showAutoCompleteList() {
     return noreslt == false && _searchautocompleteAddr.value.trim().length >= 2
         ? Positioned(
@@ -1011,7 +1006,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     //
   }
 
-//!function to get direction from origin to destination
+//!function to get direction from origin to destination in stack
   Positioned getDirectionAndOriginToDestinationNavigate() {
     return Positioned(
       height: MediaQuery.of(context).size.height * 0.115,
@@ -1144,6 +1139,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
+//!Function to show auto complete suggestion in stack upon origin to cestination navigation in flutter
+
 //! functction for naviagtion to a spectific latlang
   searchandNavigate(GoogleMapController mapController, String inputvalue,
       {int? zoom}) async {
@@ -1163,6 +1160,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
+//! functction for building review of place tap
   _buildReviewItem(review) {
     return Column(
       children: [
@@ -1236,6 +1234,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
+//! functction for building photos of the place tap
   _buildPhotoGallery(photoElement) {
     if (photoElement == null || photoElement.length == 0) {
       showBlankCard = true;
@@ -1343,6 +1342,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     }
   }
 
+//! functction to go to a place with close precison and with end lat and lang
   gotoPlace(double lat, double lng, double endLat, double endLng,
       Map<String, dynamic> boundsNe, Map<String, dynamic> boundsSw) async {
     final GoogleMapController controller = await _controller.future;
@@ -1355,6 +1355,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     _setMarker(LatLng(endLat, endLng));
   }
 
+//! functction to move camera sightly upon sliding the page viewer
   Future<void> moveCameraSlightly() async {
     final GoogleMapController controller = await _controller.future;
 
@@ -1371,6 +1372,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
         tilt: 45.0)));
   }
 
+//! functction to extract near by places list
   _nearbyPlacesList(index) {
     return AnimatedBuilder(
       animation: _pageController,
@@ -1518,6 +1520,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     );
   }
 
+//! functction to go to tapped place on page viewer
   Future<void> goToTappedPlace() async {
     final GoogleMapController controller = await _controller.future;
 
@@ -1540,6 +1543,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
         tilt: 45.0)));
   }
 
+//! functction to go to searched place
   Future<void> gotoSearchedPlace(double lat, double lng) async {
     final GoogleMapController controller = await _controller.future;
 
@@ -1549,6 +1553,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     _setMarker(LatLng(lat, lng));
   }
 
+//!Function to build list of items for page viewer
   Widget buildListItem(AutoCompleteResult placeItem, searchFlag) {
     return Padding(
       padding: const EdgeInsets.all(5.0),
