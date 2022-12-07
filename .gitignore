@@ -32,6 +32,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+
+#for windows
+/windows/
 # Symbolication related
 app.*.symbols
 
@@ -42,3 +45,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+#API Keys
+/lib/constants.dart
+/lib/views/home_page.dart
+/lib/views/SecondPracticePage.dart

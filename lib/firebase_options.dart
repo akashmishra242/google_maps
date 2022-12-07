@@ -4,6 +4,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:google_maps/constants.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -43,44 +44,4 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCm0VhKXUgP34sKZhvAezX8iZPQ50Btk-c',
-    appId: '1:770271142098:web:a71a0fab52b69a32300d0b',
-    messagingSenderId: '770271142098',
-    projectId: 'maps-codexveer',
-    authDomain: 'maps-codexveer.firebaseapp.com',
-    storageBucket: 'maps-codexveer.appspot.com',
-    measurementId: 'G-ZC4Q5DVHVB',
-  );
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBfsnAhPwM5hqaU-oadT6zmI-9TgcmsTs8',
-    appId: '1:770271142098:android:76a3419afd976c93300d0b',
-    messagingSenderId: '770271142098',
-    projectId: 'maps-codexveer',
-    storageBucket: 'maps-codexveer.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDPIU_zZ_85pKlAMnKE4GpMkvYlV2Yg6nI',
-    appId: '1:770271142098:ios:55020f56aa47e1d0300d0b',
-    messagingSenderId: '770271142098',
-    projectId: 'maps-codexveer',
-    storageBucket: 'maps-codexveer.appspot.com',
-    iosClientId:
-        '770271142098-6riugr6bql1itcqm4epl8tdg6c9rqkbe.apps.googleusercontent.com',
-    iosBundleId: 'com.codexveer.googleMaps',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDPIU_zZ_85pKlAMnKE4GpMkvYlV2Yg6nI',
-    appId: '1:770271142098:ios:55020f56aa47e1d0300d0b',
-    messagingSenderId: '770271142098',
-    projectId: 'maps-codexveer',
-    storageBucket: 'maps-codexveer.appspot.com',
-    iosClientId:
-        '770271142098-6riugr6bql1itcqm4epl8tdg6c9rqkbe.apps.googleusercontent.com',
-    iosBundleId: 'com.codexveer.googleMaps',
-  );
 }
