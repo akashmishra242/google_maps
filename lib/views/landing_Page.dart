@@ -152,6 +152,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     });
   }
 
+//! Function to set polyline on the map upon searching
   void _setPolyline(List<PointLatLng> points) {
     final String polylineIdVal = 'polyline_$polylineIdCounter';
 
@@ -182,6 +183,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     });
   }
 
+//! Function to set near marker on the place searched upon map upon searching
   _setNearMarker(LatLng point, String label, List types, String status) async {
     var counter = markerIdCounter++;
 
@@ -241,7 +243,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     }
   }
 
-  //Fetch image to place inside the tile in the pageView
+  //!Fetch image to place inside the tile in the pageView
   void fetchImage() async {
     if (_pageController.page !=
         null) if (allFavoritePlaces[_pageController.page!.toInt()]
@@ -805,7 +807,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             await controller.animateCamera(
               CameraUpdate.newCameraPosition(
                 CameraPosition(
-                    target: LatLng(value.latitude, value.longitude), zoom: 14),
+                    target: LatLng(value.latitude, value.longitude),
+                    zoom: 14.2),
               ),
             );
             showautocompletesearchbar = false;
@@ -1193,6 +1196,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                       ?.unfocus(); //to hide keyboard upon pressing done
                                   _originAddr.value = '';
                                   _destinationAddr.value = '';
+                                  setState(() {});
                                 },
                                 icon: const Icon(Icons.search)),
                             IconButton(
@@ -1225,11 +1229,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             child: RotatedBox(
               quarterTurns: 1,
               child: IconButton(
-                onPressed: () {
-                  String temp = _originController.text;
-                  _originController.text = _destinationAddr.value;
-                  _destinationController.text = temp;
-                },
+                onPressed: () {},
                 icon: const Icon(
                   Icons.compare_arrows_outlined,
                 ),
@@ -1333,11 +1333,63 @@ class _PracticePageState extends ConsumerState<PracticePage> {
               ),
               child: Center(
                 child: Column(children: [
+                  GestureDetector(
+                    onTap: () async {
+                      developer.log('pressed');
+                      await getcurrentuserlocation().then((value) {
+                        placemarkFromCoordinates(
+                                value.latitude, value.longitude)
+                            .then((placemark) {
+                          _originController.text =
+                              '${placemark.reversed.last.name} ${placemark.reversed.last.subLocality} ${placemark.reversed.last.locality} ${placemark.reversed.last.administrativeArea} ${placemark.reversed.last.country}';
+                          _originController.selection =
+                              TextSelection.fromPosition(TextPosition(
+                                  offset: _originController.text.length));
+                          FocusManager.instance.primaryFocus?.nextFocus();
+                          _originAddr.value = '';
+                        });
+                      }).then((value) =>
+                          FocusManager.instance.primaryFocus?.nextFocus());
+                    },
+                    child: Container(
+                      height: 45,
+                      padding: const EdgeInsets.all(5),
+                      margin: const EdgeInsets.only(
+                          top: 10, right: 15, left: 15, bottom: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white60.withOpacity(1),
+                        borderRadius: BorderRadius.circular(10.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.grey,
+                            offset: Offset(0.0, 1.0), //(x,y)
+                            blurRadius: 3.0,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.my_location_rounded,
+                            color: Colors.black45,
+                            size: 35,
+                          ),
+                          Text(" Use Your Location",
+                              textScaleFactor: 1.5,
+                              style: TextStyle(
+                                  fontFamily: 'WorkSans',
+                                  fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                  ),
                   const Text('No results to show',
                       style: TextStyle(
                           fontFamily: 'WorkSans', fontWeight: FontWeight.w400)),
                   const SizedBox(height: 5.0),
-                  Container(
+                  SizedBox(
                     width: 125.0,
                     child: ElevatedButton(
                       onPressed: () {
