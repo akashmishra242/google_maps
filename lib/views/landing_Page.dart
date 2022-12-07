@@ -42,6 +42,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   bool showsearchbar = false;
   bool showautocompletesearchbar = false;
   bool noreslt = false;
+  bool originnoreslt = false;
+  bool destinationnorelt = false;
   bool radiusSlider = false;
   bool cardTapped = false;
   bool pressedNear = false;
@@ -712,6 +714,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     _destinationAddr.value = '';
                   });
                   if (_polylines.isNotEmpty) {
+                    _originController.text = '';
+                    _destinationController.text = '';
+                    _autocompletesearcheditingcontroller.text = '';
+                    _searcheditingcontroller.text = '';
                     _markers = {};
                     _polylines = {};
                   }
@@ -739,6 +745,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     getDirections = false;
                   });
                   if (_polylines.isNotEmpty) {
+                    _originController.text = '';
+                    _destinationController.text = '';
+                    _autocompletesearcheditingcontroller.text = '';
+                    _searcheditingcontroller.text = '';
                     _markers = {};
                     _polylines = {};
                   }
@@ -766,6 +776,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     getDirections = true;
                   });
                   if (_polylines.isNotEmpty) {
+                    _originController.text = '';
+                    _destinationController.text = '';
+                    _autocompletesearcheditingcontroller.text = '';
+                    _searcheditingcontroller.text = '';
                     _markers = {};
                     _polylines = {};
                   }
@@ -1082,6 +1096,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 onTap: () {
                   _destinationAddr.value = '';
                 },
+                onEditingComplete: () {
+                  FocusManager.instance.primaryFocus?.nextFocus();
+                  _originAddr.value = '';
+                },
                 autofocus: true,
                 controller: _originController,
                 keyboardType: TextInputType.text,
@@ -1173,6 +1191,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                   _setPolyline(directions['polyline_decoded']);
                                   FocusManager.instance.primaryFocus
                                       ?.unfocus(); //to hide keyboard upon pressing done
+                                  _originAddr.value = '';
+                                  _destinationAddr.value = '';
                                 },
                                 icon: const Icon(Icons.search)),
                             IconButton(
@@ -1224,7 +1244,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
 
 //!Function to show auto complete suggestion in stack upon origin to destination navigation in flutter
   Positioned showOriginAutoCompleteListUponNavigation() {
-    return noreslt == false && _originAddr.value.trim().length >= 2
+    return originnoreslt == false && _originAddr.value.trim().length >= 2
         ? Positioned(
             top: 150,
             right: 20,
@@ -1275,7 +1295,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                               setState(() {
                                 if (_originAddr.value.trim().length >= 2 &&
                                     snapshot.hasData) {
-                                  noreslt = true;
+                                  originnoreslt = true;
                                 }
                               });
                               return const Center(
@@ -1344,7 +1364,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   }
 
   Positioned showDestinationAutoCompleteListUponNavigation() {
-    return noreslt == false && _destinationAddr.value.trim().length >= 2
+    return destinationnorelt == false &&
+            _destinationAddr.value.trim().length >= 2
         ? Positioned(
             top: 150,
             right: 20,
@@ -1373,33 +1394,28 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                       fontFamily: 'WorkSans',
                                       fontWeight: FontWeight.w500),
                                 ),
-                                onTap: () {
-                                  setState(() async {
-                                    _destinationController.text = snapshot
-                                        .data['predictions'][index]
-                                            ['description']
-                                        .toString();
-                                    //!important
-                                    FocusScope.of(context).requestFocus(
-                                        FocusNode()); //to close the keyboard
+                                onTap: () async {
+                                  _destinationController.text = snapshot
+                                      .data['predictions'][index]['description']
+                                      .toString();
+                                  var directions = await MapServices()
+                                      .getDirections(_originController.text,
+                                          _destinationController.text);
+                                  _markers = {};
+                                  _polylines = {};
+                                  gotoPlace(
+                                      directions['start_location']['lat'],
+                                      directions['start_location']['lng'],
+                                      directions['end_location']['lat'],
+                                      directions['end_location']['lng'],
+                                      directions['bounds_ne'],
+                                      directions['bounds_sw']);
+                                  _setPolyline(directions['polyline_decoded']);
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  _originAddr.value = '';
+                                  _destinationAddr.value = '';
 
-                                    var directions = await MapServices()
-                                        .getDirections(_originController.text,
-                                            _destinationController.text);
-                                    _markers = {};
-                                    _polylines = {};
-                                    gotoPlace(
-                                        directions['start_location']['lat'],
-                                        directions['start_location']['lng'],
-                                        directions['end_location']['lat'],
-                                        directions['end_location']['lng'],
-                                        directions['bounds_ne'],
-                                        directions['bounds_sw']);
-                                    _setPolyline(
-                                        directions['polyline_decoded']);
-
-                                    _destinationAddr.value = '';
-                                  });
+                                  setState(() {});
                                 },
                                 leading: const Icon(
                                   Icons.location_on_outlined,
@@ -1410,7 +1426,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                               setState(() {
                                 if (_destinationAddr.value.trim().length >= 2 &&
                                     snapshot.hasData) {
-                                  noreslt = true;
+                                  destinationnorelt = true;
                                 }
                               });
                               return const Center(
