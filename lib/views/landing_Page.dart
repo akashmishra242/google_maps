@@ -338,7 +338,9 @@ class _PracticePageState extends ConsumerState<PracticePage> {
               ValueListenableBuilder(
                 valueListenable: _originAddr,
                 builder: (context, value, _) {
-                  return getDirections && _originAddr.value.trim().isNotEmpty
+                  return getDirections &&
+                          _originAddr.value.trim().isNotEmpty &&
+                          _destinationAddr.value.trim().isEmpty
                       ? showOriginAutoCompleteListUponNavigation()
                       : Container();
                 },
@@ -709,6 +711,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     _originAddr.value = '';
                     _destinationAddr.value = '';
                   });
+                  if (_polylines.isNotEmpty) {
+                    _markers = {};
+                    _polylines = {};
+                  }
                   if (fabKey.currentState!.isOpen) {
                     fabKey.currentState!.close();
                   }
@@ -732,6 +738,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     cardTapped = false;
                     getDirections = false;
                   });
+                  if (_polylines.isNotEmpty) {
+                    _markers = {};
+                    _polylines = {};
+                  }
                   if (fabKey.currentState!.isOpen) {
                     fabKey.currentState!.close();
                   }
@@ -755,6 +765,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                     cardTapped = false;
                     getDirections = true;
                   });
+                  if (_polylines.isNotEmpty) {
+                    _markers = {};
+                    _polylines = {};
+                  }
                   if (fabKey.currentState!.isOpen) {
                     fabKey.currentState!.close();
                   }
@@ -1070,7 +1084,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                 },
                 autofocus: true,
                 controller: _originController,
-                keyboardType: TextInputType.streetAddress,
+                keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 onChanged: (val) {
                   //!<<<<debounce
@@ -1130,6 +1144,8 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                   _setPolyline(directions['polyline_decoded']);
                   FocusManager.instance.primaryFocus
                       ?.unfocus(); //to hide keyboard upon pressing done
+                  _originAddr.value = '';
+                  _destinationAddr.value = '';
                 },
                 decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
@@ -1189,7 +1205,11 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             child: RotatedBox(
               quarterTurns: 1,
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  String temp = _originController.text;
+                  _originController.text = _destinationAddr.value;
+                  _destinationController.text = temp;
+                },
                 icon: const Icon(
                   Icons.compare_arrows_outlined,
                 ),
@@ -1239,11 +1259,12 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                         .data['predictions'][index]
                                             ['description']
                                         .toString();
-                                    //!important
-                                    FocusScope.of(context).requestFocus(
-                                        FocusNode()); //to close the keyboard
+
                                     _originAddr.value = '';
                                   });
+                                  FocusManager.instance.primaryFocus
+                                      ?.nextFocus();
+                                  _originAddr.value = '';
                                 },
                                 leading: const Icon(
                                   Icons.location_on_outlined,
@@ -1353,7 +1374,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                       fontWeight: FontWeight.w500),
                                 ),
                                 onTap: () {
-                                  setState(() {
+                                  setState(() async {
                                     _destinationController.text = snapshot
                                         .data['predictions'][index]
                                             ['description']
@@ -1361,6 +1382,22 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                                     //!important
                                     FocusScope.of(context).requestFocus(
                                         FocusNode()); //to close the keyboard
+
+                                    var directions = await MapServices()
+                                        .getDirections(_originController.text,
+                                            _destinationController.text);
+                                    _markers = {};
+                                    _polylines = {};
+                                    gotoPlace(
+                                        directions['start_location']['lat'],
+                                        directions['start_location']['lng'],
+                                        directions['end_location']['lat'],
+                                        directions['end_location']['lng'],
+                                        directions['bounds_ne'],
+                                        directions['bounds_sw']);
+                                    _setPolyline(
+                                        directions['polyline_decoded']);
+
                                     _destinationAddr.value = '';
                                   });
                                 },
