@@ -6,7 +6,7 @@ In this flutter project Complete Implementation of Google maps in Flutter using 
 ### **This application includes:**
 1) Normal Searchbar and Navigation.
 2) Auto Suggestion Searchbar with Navigation. 
-3) Origin to Detination Navigation with User's Live Location Selection.
+3) Origin to Destination Navigation with User's Live Location Selection.
 4) Current Location Identifier.
 5) Nearby places search with awesome UI (page slider).
 6) Review,Contact Information,Photos,Nearby Places and much more.
