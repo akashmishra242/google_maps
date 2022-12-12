@@ -1,6 +1,6 @@
 # google_maps
 
-In this flutter project Complete Implementation of Google maps in Flutter using Riverpod state management.
+In this flutter project Complete Implementation of Google maps has been done in Flutter using Riverpod state management.
 (Google Maps ft. Auto Suggestions, GPS tracking, Nearby places, polylines, directions, Review, Contact Details & Photos of a place and much more..)
 
 ### **This application includes:**
