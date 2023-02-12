@@ -53,7 +53,10 @@
 
 [![googledrive](https://img.shields.io/badge/googledrive-DB4437?style=for-the-badge&logo=googledrive&logoColor=green)](https://drive.google.com/file/d/1OymDtZwtxCejopffnKpUd3d7Rz06Fj3w/view?usp=sharing)
 
---- 
+# 🔑 License
+- This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+---
 
  # 🌐 Connect with me 
 **Give your feedback at akashmishra242@gmail.com**
