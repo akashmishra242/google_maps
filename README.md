@@ -1,4 +1,4 @@
-# google_maps
+# NavIC Pro
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/akashmishra242/google_maps?style=plastic)
 ![GitHub repo size](https://img.shields.io/github/repo-size/akashmishra242/google_maps?color=important&style=plastic) 
 ![GitHub repo file count](https://img.shields.io/github/directory-file-count/akashmishra242/google_maps?color=cyan&style=plastic) 
